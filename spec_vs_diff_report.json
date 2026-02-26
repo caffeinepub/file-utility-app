@@ -1,0 +1,22 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-26T11:43:54.201Z",
+  "summary": "The diff modifies backend/main.mo and project_state.json. The main.mo file is truncated, so the presence of the http_request_update handler cannot be fully confirmed from the visible portion. The visible portion of main.mo does not show the /webhook/urpay handler implementation, though it may exist in the truncated section. The project_state.json update appears to be a version/summary update. No frontend files were modified, satisfying that constraint.",
+  "missing_requirements": [
+    {
+      "id": "REQ-37",
+      "requirement": "Add a public HTTP interface handler (http_request_update or equivalent) in backend/main.mo that responds to POST requests at /webhook/urpay with HTTP 200 OK and empty body.",
+      "reason": "The visible portion of the backend/main.mo diff does not show the http_request_update function or any /webhook/urpay route handler. The file is truncated, so it is possible the implementation exists beyond the truncation point, but there is no visible evidence of it being added.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    }
+  ],
+  "hallucinated_features": [],
+  "confidence": 0.4,
+  "changed_files": [
+    "backend/main.mo",
+    "project_state.json"
+  ]
+}

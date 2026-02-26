@@ -1,0 +1,36 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-26T11:43:54.204Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 1,
+    "implemented": 0,
+    "items": [
+      {
+        "id": "REQ-37",
+        "summary": "In `backend/main.mo`, add a public HTTP interface handler that responds to POST requests at the path `/webhook/urpay` with a 200 OK status and an empty body. This must be implemented as an `http_request_update` (or equivalent ICP HTTP gateway handler) so the canister accepts and acknowledges the incoming POST from urpay. No payload parsing, no business logic, and no state changes are required — the sole purpose is to return a 200 OK response so the endpoint can be verified as reachable.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-implementation-plan.json",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

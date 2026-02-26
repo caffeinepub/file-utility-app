@@ -1,0 +1,418 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 25,
+  "summary": "Multi-functional file utility web app with tabbed navigation (Smart Compressor, Universal Converter, Toolbox, Subscription). Glassmorphism design, client-side processing priority, drag-and-drop zones with accent colors, cross-tab file state persistence, UPI payment verification flow, and Internet Identity login with per-user account (daily uses counter + subscription status saved to user profile).",
+  "architectural_notes": [
+    "Prioritize client-side processing (browser-based) over server-side for all file operations",
+    "Use Canvas API for image conversions and PDF-Lib for PDF document operations",
+    "Maintain shared in-memory file state accessible across all tabs",
+    "Persist daily usage counter in localStorage so it survives tab navigation; reset on a new 24-hour window",
+    "Payment flow uses manual UPI verification: user pays via https://urpy.link/UhZjQD, submits 12-digit UTR ID, stored as Pending in backend; admin approves via /admin page to grant Pro access",
+    "Internet Identity (id.ai) is used for user authentication; user principal drives per-user storage of dailyUses and isPro in the backend canister",
+    "Urpay webhook endpoint at POST /webhook/urpay: validates payment_status=SUCCESS and sets isPro=true for matched user by email"
+  ],
+  "known_issues": [
+    "Daily Uses counter stuck at 0 — counter increment logic not wired to file operations"
+  ],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-create-a-tabbed-navigation-layout-with-three-tabs-smart-compressor-universal-converter-and-toolbox-the-active-tab-must-have-a-clearly-distinguished-active-state-e-g-highlighted-border-glow-or-accent-color-navigation-should-be-a-top-or-side-bar",
+      "title": "Create a tabbed navigation layout with three tabs: 'Smart Compressor', 'Universal Converter', and 'Toolbox'. The active tab must have a clearly distinguished active state (e.g., highlighted border, glow, or accent color). Navigation should be a top or side bar.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-global-file-state-store-e-g-react-context-or-zustand-style-state-so-that-files-uploaded-in-any-tab-remain-in-memory-when-the-user-switches-to-another-tab",
+      "title": "Implement a global file state store (e.g., React context or Zustand-style state) so that files uploaded in any tab remain in memory when the user switches to another tab.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-smart-compressor-tab-tab-1-users-can-drag-and-drop-or-browse-to-upload-one-or-multiple-pdf-or-image-files-jpg-png-webp-users-select-a-target-compression-goal-either-reduce-by-x-e-g-50-or-max-file-size-y-kb-users-must-also-be-able-to-choose-between-lossy-and-lossless-compression-modes-show-a-real-time-preview-panel-displaying-the-original-file-size-vs-the-estimated-compressed-size-for-each-file-support-bulk-compression-multiple-files-processed-together-all-compression-must-happen-client-side-using-the-canvas-api-for-images-and-pdf-lib-for-pdfs",
+      "title": "Build the Smart Compressor tab (Tab 1). Users can drag-and-drop or browse to upload one or multiple PDF or image files (JPG, PNG, WEBP). Users select a target compression goal: either 'Reduce by X%' (e.g., 50%) or 'Max file size Y KB'. Users must also be able to choose between 'Lossy' and 'Lossless' compression modes. Show a real-time preview panel displaying the original file size vs. the estimated compressed size for each file. Support bulk compression (multiple files processed together). All compression must happen client-side using the Canvas API (for images) and PDF-Lib (for PDFs).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-universal-converter-tab-tab-2-users-can-drag-and-drop-or-browse-to-upload-multiple-files-provide-a-from-format-dropdown-and-a-to-format-dropdown-both-supporting-pdf-jpg-png-webp-docx-and-svg-when-the-user-initiates-conversion-batch-process-all-uploaded-files-into-the-selected-output-format-use-canvas-api-for-image-to-image-conversions-and-pdf-lib-for-pdf-related-conversions-all-client-side",
+      "title": "Build the Universal Converter tab (Tab 2). Users can drag-and-drop or browse to upload multiple files. Provide a 'From' format dropdown and a 'To' format dropdown, both supporting: PDF, JPG, PNG, WEBP, DOCX, and SVG. When the user initiates conversion, batch-process all uploaded files into the selected output format. Use Canvas API for image-to-image conversions and PDF-Lib for PDF-related conversions, all client-side.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-toolbox-tab-tab-3-containing-three-distinct-tools-1-pdf-merger-users-upload-multiple-pdfs-and-merge-them-into-a-single-pdf-using-pdf-lib-client-side-2-background-remover-users-upload-an-image-and-the-background-is-removed-client-side-use-a-canvas-based-or-ml-based-approach-3-metadata-scrubber-users-upload-a-file-and-all-metadata-exif-xmp-etc-is-stripped-client-side-before-download-each-tool-should-have-its-own-clearly-labeled-section-or-sub-panel-within-the-toolbox-tab",
+      "title": "Build the Toolbox tab (Tab 3) containing three distinct tools: (1) PDF Merger — users upload multiple PDFs and merge them into a single PDF using PDF-Lib client-side; (2) Background Remover — users upload an image and the background is removed client-side (use a canvas-based or ML-based approach); (3) Metadata Scrubber — users upload a file and all metadata (EXIF, XMP, etc.) is stripped client-side before download. Each tool should have its own clearly labeled section or sub-panel within the Toolbox tab.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-glassmorphism-visual-design-consistently-across-the-entire-application-use-frosted-glass-panels-with-semi-transparent-backgrounds-and-backdrop-blur-for-all-cards-and-modals-drag-and-drop-upload-zones-must-be-highlighted-with-accent-colors-e-g-glowing-borders-or-tinted-overlays-use-a-dark-or-deep-gradient-background-to-make-the-glass-effect-prominent-typography-should-be-clean-and-modern-ensure-a-coherent-color-palette-is-used-throughout",
+      "title": "Apply a Glassmorphism visual design consistently across the entire application. Use frosted-glass panels with semi-transparent backgrounds and backdrop blur for all cards and modals. Drag-and-drop upload zones must be highlighted with accent colors (e.g., glowing borders or tinted overlays). Use a dark or deep-gradient background to make the glass effect prominent. Typography should be clean and modern. Ensure a coherent color palette is used throughout.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-a-dark-abstract-background-image-with-subtle-gradient-mesh-and-soft-glowing-particles-suitable-for-the-glassmorphism-theme-background-dim-1920x1080-png-also-generate-an-app-logo-mark-a-stylized-geometric-file-diamond-icon-in-teal-and-violet-tones-logo-icon-dim-128x128-png-use-these-as-static-assets-in-frontend-public-assets-generated",
+      "title": "Generate a dark abstract background image with subtle gradient mesh and soft glowing particles suitable for the glassmorphism theme (background.dim_1920x1080.png). Also generate an app logo mark — a stylized geometric file/diamond icon in teal and violet tones (logo-icon.dim_128x128.png). Use these as static assets in frontend/public/assets/generated.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-small-unobtrusive-credit-line-reading-made-by-ujjwal-nautiyal-in-the-app-footer-or-bottom-of-the-page-the-text-should-be-styled-in-a-small-font-size-e-g-text-xs-or-text-sm-with-reduced-opacity-to-fit-the-glassmorphism-aesthetic-without-distracting-from-the-main-ui",
+      "title": "Add a small, unobtrusive credit line reading 'Made By Ujjwal Nautiyal' in the app footer or bottom of the page. The text should be styled in a small font size (e.g., text-xs or text-sm) with reduced opacity to fit the glassmorphism aesthetic without distracting from the main UI.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-advertisement-button-banner-in-the-app-ui-e-g-inside-the-footer-area-or-as-a-subtle-panel-above-below-the-tab-content-that-promotes-a-pdf-text-extractor-tool-the-button-should-be-styled-to-fit-the-glassmorphism-aesthetic-frosted-glass-card-accent-color-border-glow-clean-modern-typography-and-include-a-short-ad-style-label-such-as-try-pdf-text-extractor-extract-text-from-any-pdf-instantly-clicking-the-button-must-open-the-url-https-filetextextractor-ujjwals-i1l-icp-page-or-the-canonical-icp-app-url-derived-from-the-canister-id-slug-filetextextractor-ujjwal-s-i1l-in-a-new-browser-tab-using-target-blank-rel-noopener-noreferrer-the-button-must-not-obstruct-the-main-app-functionality-and-should-be-visually-distinguishable-as-an-advertisement-e-g-with-a-small-ad-or-sponsored-label",
+      "title": "Add an advertisement button/banner in the app UI (e.g., inside the footer area or as a subtle panel above/below the tab content) that promotes a 'PDF Text Extractor' tool. The button should be styled to fit the glassmorphism aesthetic (frosted-glass card, accent color border/glow, clean modern typography) and include a short ad-style label such as 'Try PDF Text Extractor — Extract text from any PDF instantly!'. Clicking the button must open the URL 'https://filetextextractor-ujjwals-i1l.icp.page' (or the canonical ICP app URL derived from the canister ID slug 'filetextextractor-Ujjwal's-i1l') in a new browser tab using target='_blank' rel='noopener noreferrer'. The button must not obstruct the main app functionality and should be visually distinguishable as an advertisement (e.g., with a small 'Ad' or 'Sponsored' label).",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-app-tsx-update-the-existing-pdf-text-extractor-advertisement-banner-button-so-that-clicking-it-opens-https-pdftextextractor-ujjwal-i1l-caffeine-xyz-in-a-new-browser-tab-using-target-blank-rel-noopener-noreferrer-the-button-styling-placement-and-all-other-visual-properties-must-remain-unchanged",
+      "title": "In App.tsx, update the existing PDF Text Extractor advertisement banner/button so that clicking it opens 'https://pdftextextractor-ujjwal-i1l.caffeine.xyz' in a new browser tab using target='_blank' rel='noopener noreferrer'. The button styling, placement, and all other visual properties must remain unchanged.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-app-tsx-add-two-new-advertisement-banners-styled-consistently-with-the-existing-pdf-text-extractor-glassmorphism-ad-design-frosted-glass-card-accent-color-border-glow-small-ad-label-clean-modern-typography-the-first-banner-should-read-try-free-calculator-a-powerful-calculator-completely-free-and-link-to-https-ace-calculator-app-lovable-app-the-second-banner-should-read-try-free-advanced-calculator-advanced-calculations-at-your-fingertips-and-link-to-https-www-jotform-com-app-260533475989472-both-banners-must-open-their-respective-urls-in-a-new-browser-tab-using-target-blank-rel-noopener-noreferrer-place-both-new-banners-alongside-the-existing-pdf-text-extractor-ad-banner-in-the-same-ad-section-without-obstructing-main-app-functionality",
+      "title": "In App.tsx, add two new advertisement banners styled consistently with the existing PDF Text Extractor glassmorphism ad design (frosted-glass card, accent color border/glow, small 'Ad' label, clean modern typography). The first banner should read 'Try Free Calculator — A powerful calculator, completely free!' and link to 'https://ace-calculator-app.lovable.app/'. The second banner should read 'Try Free Advanced Calculator — Advanced calculations at your fingertips!' and link to 'https://www.jotform.com/app/260533475989472'. Both banners must open their respective URLs in a new browser tab using target='_blank' rel='noopener noreferrer'. Place both new banners alongside the existing PDF Text Extractor ad banner in the same ad section, without obstructing main app functionality.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-subscription-tab-to-the-existing-tab-navigation-in-app-tsx-alongside-smart-compressor-universal-converter-and-toolbox-the-tab-must-follow-the-same-glassmorphism-active-inactive-styling-as-the-existing-tabs-highlighted-border-glow-or-accent-color-on-active-state",
+      "title": "Add a 'Subscription' tab to the existing tab navigation in App.tsx alongside 'Smart Compressor', 'Universal Converter', and 'Toolbox'. The tab must follow the same glassmorphism active/inactive styling as the existing tabs (highlighted border, glow, or accent color on active state).",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-subscriptionpanel-component-rendered-when-the-subscription-tab-is-active-it-must-display-static-ui-showing-1-a-free-plan-card-and-a-pro-plan-card-with-feature-lists-2-an-upgrade-to-pro-button-non-functional-placeholder-3-a-current-plan-indicator-showing-current-plan-free-style-it-consistently-with-the-existing-glassmorphism-theme-frosted-glass-cards-teal-violet-accent-colors-backdrop-blur",
+      "title": "Create a SubscriptionPanel component rendered when the 'Subscription' tab is active. It must display static UI showing: (1) a 'Free' plan card and a 'Pro' plan card with feature lists; (2) an 'Upgrade to Pro' button (non-functional placeholder); (3) a current plan indicator showing 'Current Plan: Free'. Style it consistently with the existing glassmorphism theme (frosted-glass cards, teal/violet accent colors, backdrop blur).",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-daily-usage-counter-display-on-the-main-dashboard-area-visible-on-the-default-first-tab-view-or-as-a-persistent-element-above-the-tab-content-it-must-show-static-text-such-as-0-4-used-today-styled-as-a-small-glassmorphism-badge-or-pill-no-backend-logic-or-real-counter-logic-is-needed-the-value-is-hardcoded-to-0-4-used-today-for-now",
+      "title": "Add a 'Daily Usage' counter display on the main dashboard area (visible on the default/first tab view or as a persistent element above the tab content). It must show static text such as '0 / 4 used today' styled as a small glassmorphism badge or pill. No backend logic or real counter logic is needed — the value is hardcoded to '0 / 4 used today' for now.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-subscriptionpanel-tsx-update-the-pro-plan-card-to-display-the-price-as-20-per-year-using-the-inr-symbol-replace-any-existing-price-placeholder-or-usd-amount-with-20-year",
+      "title": "In SubscriptionPanel.tsx, update the Pro plan card to display the price as ₹20 per year (using the ₹ INR symbol). Replace any existing price placeholder or USD amount with '₹20/year'.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-subscriptionpanel-tsx-add-a-short-policy-description-text-beneath-the-plan-cards-or-in-a-prominent-location-that-reads-enjoy-4-free-uses-every-24-hours-upgrade-to-pro-for-unlimited-access-for-just-20-year-style-this-text-to-match-the-existing-glassmorphism-theme-small-font-reduced-opacity-or-muted-teal-violet-accent",
+      "title": "In SubscriptionPanel.tsx, add a short policy/description text beneath the plan cards or in a prominent location that reads: 'Enjoy 4 free uses every 24 hours. Upgrade to Pro for unlimited access for just ₹20/year.' Style this text to match the existing glassmorphism theme (small font, reduced opacity or muted teal/violet accent).",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-subscriptionpanel-tsx-update-the-buy-upgrade-to-pro-button-so-that-when-clicked-it-displays-an-inline-message-reading-thank-you-for-your-interest-payment-integration-is-coming-soon-the-message-should-appear-within-or-near-the-button-card-area-e-g-replacing-the-button-text-or-as-a-small-alert-banner-beneath-the-button-the-button-should-not-navigate-away-or-trigger-any-backend-call",
+      "title": "In SubscriptionPanel.tsx, update the 'Buy' / 'Upgrade to Pro' button so that when clicked, it displays an inline message reading: 'Thank you for your interest! Payment integration is coming soon.' The message should appear within or near the button/card area (e.g., replacing the button text, or as a small alert/banner beneath the button). The button should not navigate away or trigger any backend call.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-react-context-e-g-usagecontext-in-a-new-file-frontend-src-contexts-usagecontext-tsx-that-manages-the-daily-uses-counter-the-context-must-1-initialise-the-counter-from-localstorage-under-a-key-like-dailyusescount-and-a-companion-dailyusesdate-key-storing-today-s-iso-date-string-2-auto-reset-the-counter-to-0-when-the-stored-date-differs-from-today-s-date-3-expose-usescount-number-incrementuses-increments-counter-by-1-persists-to-localstorage-and-limitreached-boolean-true-when-usescount-4-4-write-every-change-back-to-localstorage-so-the-value-survives-tab-navigation-and-page-re-focus",
+      "title": "Create a React context (e.g., UsageContext) in a new file `frontend/src/contexts/UsageContext.tsx` that manages the daily-uses counter. The context must: (1) initialise the counter from `localStorage` under a key like `dailyUsesCount` (and a companion `dailyUsesDate` key storing today's ISO date string); (2) auto-reset the counter to 0 when the stored date differs from today's date; (3) expose `usesCount` (number), `incrementUses()` (increments counter by 1, persists to `localStorage`), and `limitReached` (boolean, true when `usesCount >= 4`); (4) write every change back to `localStorage` so the value survives tab-navigation and page re-focus.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-wrap-the-application-in-usageprovider-from-req-23-inside-frontend-src-app-tsx-so-that-all-tabs-and-components-have-access-to-the-usage-context",
+      "title": "Wrap the application in `UsageProvider` (from REQ-23) inside `frontend/src/App.tsx` so that all tabs and components have access to the usage context.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-app-tsx-replace-the-hardcoded-0-4-used-today-daily-usage-badge-with-a-live-value-sourced-from-usagecontext-the-badge-must-display-usescount-4-used-today-and-re-render-instantly-whenever-usescount-changes",
+      "title": "In `frontend/src/App.tsx`, replace the hardcoded `0 / 4 used today` daily-usage badge with a live value sourced from UsageContext. The badge must display `{usesCount} / 4 used today` and re-render instantly whenever `usesCount` changes.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-wire-incrementuses-from-usagecontext-into-every-file-processing-action-across-all-three-tool-tabs-so-that-each-time-the-user-initiates-a-file-operation-the-counter-increments-by-1-per-operation-1-in-smartcompressor-tsx-call-incrementuses-once-when-the-user-triggers-compression-one-call-per-compress-action-regardless-of-file-count-2-in-universalconverter-tsx-call-incrementuses-once-when-the-user-triggers-a-batch-conversion-3-in-toolbox-tsx-its-sub-tools-call-incrementuses-once-when-the-user-triggers-pdf-merge-background-removal-or-metadata-scrub",
+      "title": "Wire `incrementUses()` from UsageContext into every file-processing action across all three tool tabs so that each time the user initiates a file operation, the counter increments by 1 per operation: (1) In `SmartCompressor.tsx` — call `incrementUses()` once when the user triggers compression (one call per compress action, regardless of file count); (2) In `UniversalConverter.tsx` — call `incrementUses()` once when the user triggers a batch conversion; (3) In `Toolbox.tsx` / its sub-tools — call `incrementUses()` once when the user triggers PDF Merge, Background Removal, or Metadata Scrub.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-app-tsx-and-the-relevant-tool-components-implement-a-usage-limit-block-when-limitreached-is-true-usescount-4-all-file-operation-trigger-buttons-compress-convert-merge-remove-background-scrub-metadata-must-be-visually-disabled-greyed-out-non-interactive-additionally-when-a-user-attempts-to-trigger-any-file-operation-while-limitreached-is-true-display-a-full-screen-or-overlay-modal-popup-with-the-message-limit-reached-upgrade-for-20-styled-in-the-existing-glassmorphism-theme-frosted-glass-card-teal-violet-accent-backdrop-blur-the-popup-must-include-a-button-that-navigates-the-user-to-the-subscription-tab-and-a-close-dismiss-button",
+      "title": "In `frontend/src/App.tsx` and the relevant tool components, implement a usage limit block: when `limitReached` is true (usesCount >= 4), all file-operation trigger buttons (Compress, Convert, Merge, Remove Background, Scrub Metadata) must be visually disabled (greyed out, non-interactive). Additionally, when a user attempts to trigger any file operation while `limitReached` is true, display a full-screen or overlay modal/popup with the message 'Limit Reached — Upgrade for ₹20' styled in the existing glassmorphism theme (frosted-glass card, teal/violet accent, backdrop blur). The popup must include a button that navigates the user to the Subscription tab and a close/dismiss button.",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-components-subscriptionpanel-tsx-replace-the-current-buy-pro-upgrade-to-pro-button-behavior-with-a-two-step-payment-flow-step-1-the-buy-pro-button-must-open-https-urpy-link-uhzjqd-in-a-new-browser-tab-target-blank-rel-noopener-noreferrer-immediately-after-the-user-clicks-the-button-reveal-a-step-2-section-within-the-same-panel-do-not-navigate-away-the-step-2-section-must-display-the-heading-step-2-enter-your-12-digit-upi-utr-transaction-id-from-the-urpay-receipt-and-contain-a-an-email-input-field-label-your-email-address-b-a-text-input-field-label-upi-utr-transaction-id-maxlength-12-numeric-only-and-c-a-submit-for-verification-button-style-the-step-2-section-consistently-with-the-existing-glassmorphism-theme-frosted-glass-card-teal-violet-accent-backdrop-blur",
+      "title": "In `frontend/src/components/SubscriptionPanel.tsx`, replace the current 'Buy Pro' / 'Upgrade to Pro' button behavior with a two-step payment flow: **Step 1** — The 'Buy Pro' button must open `https://urpy.link/UhZjQD` in a new browser tab (`target='_blank'` `rel='noopener noreferrer'`). Immediately after the user clicks the button, reveal a **Step 2 section** within the same panel (do not navigate away). The Step 2 section must display the heading 'Step 2: Enter your 12-digit UPI UTR/Transaction ID from the urpay receipt.' and contain: (a) an email input field (label: 'Your Email Address'), (b) a text input field (label: 'UPI UTR / Transaction ID', maxLength 12, numeric only), and (c) a 'Submit for Verification' button. Style the Step 2 section consistently with the existing glassmorphism theme (frosted-glass card, teal/violet accent, backdrop blur).",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-components-subscriptionpanel-tsx-wire-the-submit-for-verification-button-from-req-29-to-call-the-backend-submitutr-email-utrid-method-via-the-icp-actor-before-calling-validate-that-the-email-field-is-non-empty-and-the-utr-field-is-exactly-12-numeric-digits-show-inline-validation-error-messages-if-not-on-successful-submission-hide-the-step-2-form-and-display-a-confirmation-message-in-its-place-reading-payment-received-verification-in-progress-usually-30-mins-styled-as-a-teal-accented-glassmorphism-info-banner-on-error-e-g-duplicate-submission-or-invalid-utr-returned-from-backend-display-an-inline-error-message-near-the-form",
+      "title": "In `frontend/src/components/SubscriptionPanel.tsx`, wire the 'Submit for Verification' button (from REQ-29) to call the backend `submitUTR(email, utrId)` method via the ICP actor. Before calling: validate that the email field is non-empty and the UTR field is exactly 12 numeric digits — show inline validation error messages if not. On successful submission, hide the Step 2 form and display a confirmation message in its place reading: 'Payment Received. Verification in progress (usually 30 mins).' styled as a teal-accented glassmorphism info banner. On error (e.g., duplicate submission or invalid UTR returned from backend), display an inline error message near the form.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-components-subscriptionpanel-tsx-on-component-mount-or-when-the-subscription-tab-becomes-active-call-getmyverificationstatus-from-the-backend-if-the-returned-status-is-pending-automatically-show-the-payment-received-verification-in-progress-usually-30-mins-banner-skipping-steps-1-and-2-entirely-if-the-status-is-approved-show-a-you-are-a-pro-user-confirmation-and-reflect-pro-status-in-the-current-plan-indicator-if-status-is-null-show-the-normal-free-pro-plan-cards-with-the-buy-pro-button",
+      "title": "In `frontend/src/components/SubscriptionPanel.tsx`, on component mount (or when the Subscription tab becomes active), call `getMyVerificationStatus()` from the backend. If the returned status is `#pending`, automatically show the 'Payment Received. Verification in progress (usually 30 mins).' banner (skipping Steps 1 and 2 entirely). If the status is `#approved`, show a 'You are a Pro user!' confirmation and reflect Pro status in the current plan indicator. If status is `null`, show the normal Free/Pro plan cards with the 'Buy Pro' button.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-new-frontend-route-page-at-admin-e-g-frontend-src-components-adminpanel-tsx-rendered-when-the-url-path-is-admin-this-page-must-1-call-getpendingverifications-from-the-backend-on-load-and-display-all-pending-utr-submissions-in-a-table-or-list-of-glassmorphism-cards-each-row-card-must-show-the-user-s-email-their-12-digit-utr-transaction-id-and-the-submission-timestamp-2-each-row-must-have-an-approve-button-clicking-approve-calls-approveutr-targetprincipal-on-the-backend-on-success-remove-the-row-from-the-pending-list-and-show-a-brief-success-indicator-e-g-approved-inline-3-if-getpendingverifications-returns-an-access-denied-error-non-admin-caller-show-a-message-access-denied-admin-only-4-style-the-page-consistently-with-the-existing-glassmorphism-theme-add-a-heading-admin-pending-utr-verifications-do-not-add-the-admin-route-to-the-main-tab-navigation-bar",
+      "title": "Create a new frontend route/page at `/admin` (e.g., `frontend/src/components/AdminPanel.tsx` rendered when the URL path is `/admin`). This page must: (1) Call `getPendingVerifications()` from the backend on load and display all pending UTR submissions in a table or list of glassmorphism cards. Each row/card must show: the user's email, their 12-digit UTR/Transaction ID, and the submission timestamp. (2) Each row must have an 'Approve' button. Clicking 'Approve' calls `approveUTR(targetPrincipal)` on the backend. On success, remove the row from the pending list and show a brief success indicator (e.g., 'Approved!' inline). (3) If `getPendingVerifications()` returns an access-denied error (non-admin caller), show a message: 'Access denied. Admin only.' (4) Style the page consistently with the existing glassmorphism theme. Add a heading 'Admin — Pending UTR Verifications'. Do not add the `/admin` route to the main tab navigation bar.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-components-appheader-tsx-or-a-new-sibling-component-composed-alongside-it-without-editing-immutable-files-add-a-login-button-to-the-app-header-use-the-existing-useinternetidentity-hook-from-frontend-src-hooks-useinternetidentity-ts-to-trigger-internet-identity-login-when-clicked-once-authenticated-replace-the-login-button-with-the-user-s-principal-id-displayed-as-a-truncated-string-e-g-first-5-and-last-3-chars-separated-by-styled-as-a-small-glassmorphism-pill-badge-plus-a-logout-button-style-both-the-login-button-and-the-logged-in-state-consistently-with-the-existing-glassmorphism-theme-frosted-glass-card-teal-violet-accent-backdrop-blur",
+      "title": "In `frontend/src/components/AppHeader.tsx` (or a new sibling component composed alongside it without editing immutable files), add a 'Login' button to the app header. Use the existing `useInternetIdentity` hook (from `frontend/src/hooks/useInternetIdentity.ts`) to trigger Internet Identity login when clicked. Once authenticated, replace the 'Login' button with the user's principal ID displayed as a truncated string (e.g., first 5 and last 3 chars separated by '…') styled as a small glassmorphism pill/badge, plus a 'Logout' button. Style both the login button and the logged-in state consistently with the existing glassmorphism theme (frosted-glass card, teal/violet accent, backdrop blur).",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-contexts-usagecontext-tsx-to-synchronise-the-daily-uses-counter-with-the-backend-when-the-user-is-logged-in-via-internet-identity-when-the-user-is-authenticated-principal-available-from-useinternetidentity-on-context-initialisation-call-getdailyusage-from-the-backend-actor-and-use-the-returned-count-as-the-initial-usescount-instead-of-reading-from-localstorage-when-incrementuses-is-called-call-incrementdailyusage-todayisodate-on-the-backend-and-update-usescount-with-the-returned-count-when-the-user-is-not-authenticated-anonymous-continue-using-the-existing-localstorage-only-logic-unchanged-the-limitreached-boolean-must-remain-true-when-usescount-4-in-both-modes-pro-users-where-getispro-returns-true-must-have-limitreached-permanently-set-to-false-effectively-bypassing-the-4-use-cap",
+      "title": "Update `frontend/src/contexts/UsageContext.tsx` to synchronise the daily-uses counter with the backend when the user is logged in via Internet Identity. When the user is authenticated (principal available from `useInternetIdentity`): on context initialisation, call `getDailyUsage()` from the backend actor and use the returned count as the initial `usesCount` (instead of reading from `localStorage`). When `incrementUses()` is called, call `incrementDailyUsage(todayISODate)` on the backend and update `usesCount` with the returned count. When the user is not authenticated (anonymous), continue using the existing `localStorage`-only logic unchanged. The `limitReached` boolean must remain true when `usesCount >= 4` in both modes. Pro users (where `getIsPro()` returns true) must have `limitReached` permanently set to `false`, effectively bypassing the 4-use cap.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-components-subscriptionpanel-tsx-to-reflect-the-authenticated-user-s-live-pro-status-sourced-from-the-backend-on-mount-or-when-the-subscription-tab-becomes-active-and-the-user-is-logged-in-call-getispro-from-the-backend-actor-if-getispro-returns-true-display-current-plan-pro-in-the-plan-indicator-instead-of-current-plan-free-and-hide-the-buy-pro-payment-flow-section-the-existing-getmyverificationstatus-flow-for-pending-approved-states-must-remain-unchanged-when-the-user-is-not-logged-in-show-a-prompt-reading-log-in-to-save-your-subscription-to-your-account-near-the-plan-indicator-while-still-displaying-the-normal-free-pro-plan-cards",
+      "title": "Update `frontend/src/components/SubscriptionPanel.tsx` to reflect the authenticated user's live Pro status sourced from the backend. On mount (or when the Subscription tab becomes active and the user is logged in), call `getIsPro()` from the backend actor. If `getIsPro()` returns `true`, display 'Current Plan: Pro ✓' in the plan indicator (instead of 'Current Plan: Free') and hide the 'Buy Pro' / payment flow section. The existing `getMyVerificationStatus()` flow for `#pending` / `#approved` states must remain unchanged. When the user is not logged in, show a prompt reading 'Log in to save your subscription to your account' near the plan indicator, while still displaying the normal Free/Pro plan cards.",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Tab 1: Smart Compressor for PDF & Images with target size selection (reduce by % or max KB), real-time size preview, bulk compression, and lossy/lossless settings",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Tab 2: Universal Converter with From/To dropdowns supporting PDF, JPG, PNG, WEBP, DOCX, SVG, and batch processing to single output format using Canvas API / PDF-Lib",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Tab 3: Toolbox with PDF Merger, Background Remover for images, and Metadata Scrubber",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Tabbed navigation UI with active state indicator, Glassmorphism design style, drag-and-drop upload zones with accent color highlights",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Cross-tab file state persistence: files uploaded in one tab remain in memory when switching tabs",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "The backend Motoko actor should expose only minimal stub endpoints needed to satisfy the ICP deployment. No file data should be sent to the backend — all file processing must remain client-side in the browser.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Add a small 'Made By Ujjwal Nautiyal' credit line somewhere in the UI (e.g., footer)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Add an advertisement button/banner for a PDF text extractor tool that redirects users to the link 'filetextextractor-Ujjwal's-i1l'",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Add advertisement banners for 'Free Calculator' (https://ace-calculator-app.lovable.app/) and 'Free Advanced Calculator' (https://www.jotform.com/app/260533475989472), styled consistently with existing glassmorphism ad design, opening in new tabs",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Add a subscription system to the app (e.g., subscription tiers, paywall for premium features, or subscription management UI)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Define subscription tiers in the backend Motoko actor. Create at least two tiers: 'Free' (default, limited features) and 'Pro' (full access). Store each user's subscription status keyed by their Internet Identity principal. Expose query and update methods: getSubscription(principal) → SubscriptionTier, and subscribe(tier) → Result to set/upgrade a subscription.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Create a useSubscription React hook that calls the backend getSubscription and subscribe methods via the ICP actor. The hook must expose: currentTier (string), isProUser (boolean), upgradeToPro() async function, and isLoading/error states. Use React Query for caching and invalidation on upgrade.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Add a 'Subscription' modal or panel accessible from the app header (e.g., a 'Upgrade to Pro' button next to the existing logo/badges in AppHeader.tsx area, but implemented as a new component, not by editing AppHeader.tsx directly). The modal must display the Free and Pro tier feature comparison, the user's current tier, and an 'Upgrade to Pro' call-to-action button. Style it consistently with the existing glassmorphism theme (frosted-glass card, teal/violet accent colors, backdrop blur).",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Gate premium features behind the Pro subscription tier. Apply the following restrictions for Free users: (1) Smart Compressor — limit bulk compression to a maximum of 3 files per batch; (2) Universal Converter — limit batch conversion to a maximum of 3 files; (3) Toolbox PDF Merger — limit merging to a maximum of 3 PDFs. When a Free user exceeds these limits, display an inline upsell prompt styled as a glassmorphism banner that reads 'Upgrade to Pro for unlimited files' with a link/button to open the subscription modal.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Add a 'Subscription' tab to the navigation menu and a 'Daily Usage' counter (e.g., '0/4 used today') on the main dashboard — UI only, no backend logic required",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Finalize Subscription tab: show price as ₹20/year, add policy text 'Enjoy 4 free uses every 24 hours. Upgrade to Pro for unlimited access for just ₹20/year.', update Buy button to show 'Thank you for your interest! Payment integration is coming soon.' on click, use ₹ (INR) currency symbol throughout",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Fix Daily Uses counter: increment by 1 on each file operation/use, sync counter UI instantly, block further use at 4 with 'Limit Reached - Upgrade for ₹20' popup disabling input, persist count across tab navigation (e.g., via localStorage)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Update Subscription flow: 'Buy Pro' button opens https://urpy.link/UhZjQD; after click show Step 2 to enter 12-digit UPI UTR/Transaction ID; on 'Submit for Verification' save email + UTR to a Pending list in the database; show 'Payment Received. Verification in progress (usually 30 mins).' on user dashboard; add /admin page listing pending UTR numbers with an 'Approve' button to unlock Pro mode for verified users",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-25",
+      "summary": "In the backend Motoko actor (`backend/main.mo`), add data structures and methods to support the UPI payment verification flow: (1) Define a `PendingVerification` record type with fields: `principal` (Principal), `email` (Text), `utrId` (Text, 12-digit), `submittedAt` (Int/timestamp), `status` (variant `#pending` | `#approved`). (2) Maintain a stable `HashMap` or `TrieMap` of `Principal → PendingVerification` (keyed by principal). (3) Expose `submitUTR(email: Text, utrId: Text) → Result<Text, Text>` — an update call that stores a new PendingVerification entry for the caller's principal with status `#pending`. Validate that `utrId` is exactly 12 digits; return an error if not. (4) Expose `getPendingVerifications() → [PendingVerification]` — a query callable only by the canister controller/admin, returning all entries with status `#pending`. (5) Expose `approveUTR(targetPrincipal: Principal) → Result<Text, Text>` — an update callable only by the canister controller/admin, that sets the matching entry's status to `#approved` and upgrades the user's subscription tier to `#pro` in the existing subscription store. (6) Expose `getMyVerificationStatus() → ?VerificationStatus` — a query that returns the current user's verification status (`#pending` | `#approved` | null if no submission).",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-26",
+      "summary": "Add a 'Login' button in the header using Internet Identity (id.ai). Once logged in, display the user's principal/ID in the header. Persist the user's 4-use daily counter and subscription (isPro) status to their backend account profile so it is tied to their identity rather than just localStorage.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "In `backend/main.mo`, extend the existing actor to support per-user daily usage tracking tied to Internet Identity principals. Add a stable `HashMap` of `Principal → UserProfile` where `UserProfile` contains: `dailyUsesCount` (Nat), `lastUsedDate` (Text, ISO date string e.g. '2025-01-01'), and `isPro` (Bool, already managed via the existing subscription/UTR approval logic). Expose the following methods: (1) `getDailyUsage() → { count: Nat; date: Text }` — query, returns the caller's current daily uses count and the stored date; (2) `incrementDailyUsage(today: Text) → { count: Nat; date: Text }` — update, if the stored date differs from `today`, resets count to 0 and sets date to `today` before incrementing; then increments count by 1 and persists; returns the updated count and date; (3) `getIsPro() → Bool` — query, returns whether the caller's principal has `isPro = true` (derived from the existing UTR approval / subscription store).",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-29",
+      "summary": "Add a blank public POST route at /webhook/urpay that returns 200 OK (minimal stub for urpay webhook connection testing)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-30",
+      "summary": "Full urpay webhook: extract user_email and payment_status from POST payload; if status is SUCCESS, set isPro=true for that user; update dashboard to Pro Mode Active live without refresh",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-31",
+      "summary": "In `backend/main.mo`, add a public HTTP interface handler that responds to POST requests at the path `/webhook/urpay` with a 200 OK status and an empty body. This must be implemented as an `http_request_update` (or equivalent ICP HTTP gateway handler) so the canister accepts and acknowledges the incoming POST from urpay. No payload parsing, no business logic, and no state changes are required — the sole purpose is to return a 200 OK response so the endpoint can be verified as reachable.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "File Utility App",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}
