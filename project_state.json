@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 25,
-  "summary": "Multi-functional file utility web app with tabbed navigation (Smart Compressor, Universal Converter, Toolbox, Subscription). Glassmorphism design, client-side processing priority, drag-and-drop zones with accent colors, cross-tab file state persistence, UPI payment verification flow, and Internet Identity login with per-user account (daily uses counter + subscription status saved to user profile).",
+  "projectStateVersion": 29,
+  "summary": "Multi-functional file utility web app with tabbed navigation (Smart Compressor, Universal Converter, Toolbox, Subscription). Glassmorphism design, client-side processing priority, drag-and-drop zones with accent colors, cross-tab file state persistence, UPI payment verification flow, and Internet Identity login with per-user account (daily uses counter + subscription status saved to user profile). Admin panel is open to all authenticated users (no principal-based access control).",
   "architectural_notes": [
     "Prioritize client-side processing (browser-based) over server-side for all file operations",
     "Use Canvas API for image conversions and PDF-Lib for PDF document operations",
@@ -9,12 +9,13 @@
     "Persist daily usage counter in localStorage so it survives tab navigation; reset on a new 24-hour window",
     "Payment flow uses manual UPI verification: user pays via https://urpy.link/UhZjQD, submits 12-digit UTR ID, stored as Pending in backend; admin approves via /admin page to grant Pro access",
     "Internet Identity (id.ai) is used for user authentication; user principal drives per-user storage of dailyUses and isPro in the backend canister",
-    "Urpay webhook endpoint at POST /webhook/urpay: validates payment_status=SUCCESS and sets isPro=true for matched user by email"
+    "Urpay webhook endpoint at POST /webhook/urpay: validates payment_status=SUCCESS and sets isPro=true for matched user by email",
+    "Admin panel (/admin) is open to all authenticated users — no principal-based access control; getPendingVerifications() and approveUTR() callable by any caller"
   ],
   "known_issues": [
     "Daily Uses counter stuck at 0 — counter increment logic not wired to file operations"
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-create-a-tabbed-navigation-layout-with-three-tabs-smart-compressor-universal-converter-and-toolbox-the-active-tab-must-have-a-clearly-distinguished-active-state-e-g-highlighted-border-glow-or-accent-color-navigation-should-be-a-top-or-side-bar",
@@ -247,6 +248,22 @@
         "REQ-36"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-components-adminpanel-tsx-on-component-mount-before-calling-getpendingverifications-call-the-backend-initadmin-method-via-the-icp-actor-if-initadmin-returns-ok-the-current-user-has-just-been-stored-as-admin-proceed-to-load-pending-verifications-normally-if-initadmin-returns-err-admin-already-set-also-proceed-to-load-pending-verifications-normally-the-user-may-already-be-the-stored-admin-if-getpendingverifications-subsequently-returns-an-access-denied-error-display-access-denied-admin-only-as-before-this-ensures-that-the-first-logged-in-user-to-visit-admin-is-automatically-registered-as-the-permanent-admin-without-any-manual-step",
+      "title": "In `frontend/src/components/AdminPanel.tsx`, on component mount (before calling `getPendingVerifications()`), call the backend `initAdmin()` method via the ICP actor. If `initAdmin()` returns `#ok`, the current user has just been stored as admin — proceed to load pending verifications normally. If `initAdmin()` returns `#err` (admin already set), also proceed to load pending verifications normally (the user may already be the stored admin). If `getPendingVerifications()` subsequently returns an access-denied error, display 'Access denied. Admin only.' as before. This ensures that the first logged-in user to visit `/admin` is automatically registered as the permanent admin without any manual step.",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-components-adminpanel-tsx-remove-the-initadmin-call-on-mount-and-remove-the-access-denied-admin-only-error-display-logic-the-component-should-proceed-directly-to-calling-getpendingverifications-on-mount-and-display-the-results-any-conditional-rendering-tied-to-an-access-denied-state-must-be-removed",
+      "title": "In `frontend/src/components/AdminPanel.tsx`, remove the `initAdmin()` call on mount and remove the 'Access denied. Admin only.' error display logic. The component should proceed directly to calling `getPendingVerifications()` on mount and display the results. Any conditional rendering tied to an access-denied state must be removed.",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -407,6 +424,20 @@
       "summary": "In `backend/main.mo`, add a public HTTP interface handler that responds to POST requests at the path `/webhook/urpay` with a 200 OK status and an empty body. This must be implemented as an `http_request_update` (or equivalent ICP HTTP gateway handler) so the canister accepts and acknowledges the incoming POST from urpay. No payload parsing, no business logic, and no state changes are required — the sole purpose is to return a 200 OK response so the endpoint can be verified as reachable.",
       "reqIds": [
         "REQ-37"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-34",
+      "summary": "Remove all admin access restrictions: make getPendingVerifications() and approveUTR() callable by any authenticated user. Remove initAdmin() principal-check logic and the 'Access denied. Admin only.' gate from both backend and AdminPanel.tsx.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-35",
+      "summary": "In `backend/main.mo`, remove all principal-based access control from `getPendingVerifications()` and `approveUTR()`. Both methods must be callable by any authenticated user without any admin principal check. Remove or disable the `initAdmin()` method's principal-storage logic so it no longer gates access. Remove any stored admin principal state and all access-denied guard clauses from these two methods.",
+      "reqIds": [
+        "REQ-40"
       ],
       "status": "pending"
     }

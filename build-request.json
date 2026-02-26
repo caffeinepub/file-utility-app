@@ -1,38 +1,57 @@
 {
   "kind": "build_request",
-  "title": "Add blank public POST /webhook/urpay route returning 200 OK",
-  "priority": "normal",
+  "title": "Remove admin access restrictions — open admin panel to all authenticated users",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-37",
-      "text": "In `backend/main.mo`, add a public HTTP interface handler that responds to POST requests at the path `/webhook/urpay` with a 200 OK status and an empty body. This must be implemented as an `http_request_update` (or equivalent ICP HTTP gateway handler) so the canister accepts and acknowledges the incoming POST from urpay. No payload parsing, no business logic, and no state changes are required — the sole purpose is to return a 200 OK response so the endpoint can be verified as reachable.",
+      "id": "REQ-40",
+      "text": "In `backend/main.mo`, remove all principal-based access control from `getPendingVerifications()` and `approveUTR()`. Both methods must be callable by any authenticated user without any admin principal check. Remove or disable the `initAdmin()` method's principal-storage logic so it no longer gates access. Remove any stored admin principal state and all access-denied guard clauses from these two methods.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-last"
         ],
         "quotes": [
-          "only add a blank public POST route at /webhook/urpay. Just ensure the route exists and returns a '200 OK' status so I can test the connection."
+          "Just give everyone admin access",
+          "removing all admin access restrictions so everyone can access the `/admin` panel without any principal check"
         ]
       },
       "acceptanceCriteria": [
-        "A POST request to /webhook/urpay returns an HTTP 200 status code.",
-        "No request body parsing or business logic is executed.",
-        "No changes are made to any existing backend state or data structures.",
-        "No frontend files are modified."
+        "`getPendingVerifications()` returns pending UTR submissions when called by any authenticated principal (not just a stored admin).",
+        "`approveUTR(targetPrincipal)` successfully approves a UTR when called by any authenticated principal.",
+        "No 'access denied' or 'unauthorized' error is returned from either method for any authenticated caller.",
+        "`initAdmin()` no longer stores or enforces an admin principal (can be a no-op or removed)."
+      ]
+    },
+    {
+      "id": "REQ-41",
+      "text": "In `frontend/src/components/AdminPanel.tsx`, remove the `initAdmin()` call on mount and remove the 'Access denied. Admin only.' error display logic. The component should proceed directly to calling `getPendingVerifications()` on mount and display the results. Any conditional rendering tied to an access-denied state must be removed.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-last"
+        ],
+        "quotes": [
+          "removing all admin access restrictions",
+          "remove the access-denied gate"
+        ]
+      },
+      "acceptanceCriteria": [
+        "AdminPanel.tsx no longer calls `initAdmin()` on mount.",
+        "AdminPanel.tsx no longer renders an 'Access denied. Admin only.' message under any condition.",
+        "On mount, the component immediately fetches and displays pending UTR verifications.",
+        "The Approve button on each row calls `approveUTR(targetPrincipal)` and removes the approved row from the list on success."
       ]
     }
   ],
   "constraints": [
-    "Do not make any UI or frontend changes.",
-    "Do not parse or act on the webhook payload — this is a stub only.",
-    "Do not modify any existing backend methods or data structures."
+    "Do not change the visual design or layout of AdminPanel.tsx beyond removing the access-denied gate.",
+    "Do not alter any other backend methods or data structures beyond the admin access control logic."
   ],
   "nonGoals": [
-    "Extracting user_email or payment_status from the webhook payload.",
-    "Setting isPro=true based on webhook data.",
-    "Live dashboard updates triggered by the webhook.",
-    "Any frontend changes whatsoever."
+    "Adding any new authentication mechanism or replacing Internet Identity.",
+    "Changing the UTR submission or approval data model.",
+    "Modifying any tab other than the admin panel."
   ],
   "imageRequirements": {
     "required": [],

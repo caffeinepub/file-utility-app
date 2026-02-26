@@ -5,9 +5,12 @@ import Time "mo:core/Time";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Nat "mo:core/Nat";
+import Iter "mo:core/Iter";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   type SubscriptionTier = {
     #free;
@@ -82,7 +85,6 @@ actor {
     };
     switch (userProfiles.get(caller)) {
       case (null) {
-        // No profile yet: return zero usage
         { count = 0; date = "" };
       };
       case (?profile) {
@@ -185,8 +187,8 @@ actor {
   };
 
   public query ({ caller }) func countSubscribers() : async Nat {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can count subscribers");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can perform this action");
     };
     let filtered = subscriptionStore.filter(
       func(_principal : Principal, tier : SubscriptionTier) : Bool {
@@ -216,9 +218,6 @@ actor {
   };
 
   public query ({ caller }) func getPendingVerifications() : async [UTRSubmission] {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can view pending verifications");
-    };
     let filtered = utrStore.toArray().filter(
       func((_principal, submission)) { submission.status == #pending }
     );
@@ -228,9 +227,6 @@ actor {
   };
 
   public shared ({ caller }) func approveUTR(principalToApprove : Principal) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can approve UTR verifications");
-    };
     switch (utrStore.get(principalToApprove)) {
       case (null) {
         Runtime.trap("No pending verification found for this principal.");
@@ -262,7 +258,7 @@ actor {
   };
 
   public shared ({ caller }) func batchApproveUTRs() : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can batch approve UTR verifications");
     };
     for ((principal, submission) in utrStore.entries()) {

@@ -97,12 +97,6 @@ export function AdminPanel() {
   const [approvingPrincipal, setApprovingPrincipal] = useState<string | null>(null);
   const [approvedPrincipals, setApprovedPrincipals] = useState<Set<string>>(new Set());
 
-  const isAccessDenied =
-    error instanceof Error &&
-    (error.message.toLowerCase().includes('unauthorized') ||
-      error.message.toLowerCase().includes('admin') ||
-      error.message.toLowerCase().includes('access'));
-
   const handleApprove = async (principal: Principal) => {
     const key = principal.toString();
     setApprovingPrincipal(key);
@@ -146,22 +140,8 @@ export function AdminPanel() {
           </button>
         </div>
 
-        {/* Access Denied */}
-        {isAccessDenied && (
-          <div className={cn(
-            'flex items-center gap-3 px-5 py-4 rounded-xl',
-            'backdrop-blur-md bg-destructive/10 border border-destructive/30',
-          )}>
-            <AlertCircle className="w-5 h-5 text-destructive shrink-0" />
-            <div>
-              <p className="text-sm font-semibold text-destructive">Access denied. Admin only.</p>
-              <p className="text-xs text-white/50 mt-0.5">You must be an admin to view this page.</p>
-            </div>
-          </div>
-        )}
-
         {/* Generic Error */}
-        {error && !isAccessDenied && (
+        {error && (
           <div className={cn(
             'flex items-center gap-3 px-5 py-4 rounded-xl',
             'backdrop-blur-md bg-destructive/10 border border-destructive/30',
@@ -173,7 +153,7 @@ export function AdminPanel() {
           </div>
         )}
 
-        {/* Loading */}
+        {/* Loading verifications */}
         {isLoading && !error && (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 text-teal animate-spin" />

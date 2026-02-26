@@ -1,4 +1,25 @@
 {
   "kind": "feature_evidence_report",
-  "features": []
+  "features": [
+    {
+      "featureId": "feature-in-frontend-src-components-adminpanel-tsx-remove-the-initadmin-call-on-mount-and-remove-the-access-denied-admin-only-error-display-logic-the-component-should-proceed-directly-to-calling-getpendingverifications-on-mount-and-display-the-results-any-conditional-rendering-tied-to-an-access-denied-state-must-be-removed",
+      "featureTitle": "In `frontend/src/components/AdminPanel.tsx`, remove the `initAdmin()` call on mount and remove the 'Access denied. Admin only.' error display logic. The component should proceed directly to calling `getPendingVerifications()` on mount and display the results. Any conditional rendering tied to an access-denied state must be removed.",
+      "files": [
+        "frontend/src/components/AdminPanel.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-41"
+      ],
+      "confidence": "high"
+    }
+  ]
 }

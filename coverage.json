@@ -1,33 +1,50 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T11:43:54.204Z",
+  "generatedAt": "2026-02-26T14:47:09.791Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 0,
+    "total": 2,
+    "implemented": 1,
     "items": [
       {
-        "id": "REQ-37",
-        "summary": "In `backend/main.mo`, add a public HTTP interface handler that responds to POST requests at the path `/webhook/urpay` with a 200 OK status and an empty body. This must be implemented as an `http_request_update` (or equivalent ICP HTTP gateway handler) so the canister accepts and acknowledges the incoming POST from urpay. No payload parsing, no business logic, and no state changes are required — the sole purpose is to return a 200 OK response so the endpoint can be verified as reachable.",
+        "id": "REQ-40",
+        "summary": "In `backend/main.mo`, remove all principal-based access control from `getPendingVerifications()` and `approveUTR()`. Both methods must be callable by any authenticated user without any admin principal check. Remove or disable the `initAdmin()` method's principal-storage logic so it no longer gates access. Remove any stored admin principal state and all access-denied guard clauses from these two methods.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
+      },
+      {
+        "id": "REQ-41",
+        "summary": "In `frontend/src/components/AdminPanel.tsx`, remove the `initAdmin()` call on mount and remove the 'Access denied. Admin only.' error display logic. The component should proceed directly to calling `getPendingVerifications()` on mount and display the results. Any conditional rendering tied to an access-denied state must be removed.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/AdminPanel.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/AdminPanel.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
+    "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
+    "frontend/src/components/AdminPanel.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

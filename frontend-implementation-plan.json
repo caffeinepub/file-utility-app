@@ -1,6 +1,29 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Frontend Implementation Plan for Webhook Route Addition",
-  "requirements": []
+  "title": "Remove admin access restrictions — open admin panel to all authenticated users",
+  "requirements": [
+    {
+      "id": "REQ-41",
+      "summary": "Remove admin access control from AdminPanel component, allowing all authenticated users to view and approve pending UTR verifications",
+      "acceptanceCriteria": [
+        "AdminPanel.tsx no longer calls `initAdmin()` on mount.",
+        "AdminPanel.tsx no longer renders an 'Access denied. Admin only.' message under any condition.",
+        "On mount, the component immediately fetches and displays pending UTR verifications.",
+        "The Approve button on each row calls `approveUTR(targetPrincipal)` and removes the approved row from the list on success."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AdminPanel.tsx",
+          "operation": "modify",
+          "description": "Remove the `useInitAdmin` hook call and its associated loading/error state handling. Remove the conditional rendering that displays 'Access denied. Admin only.' error message. Update the component to immediately call `usePendingVerifications` on mount without waiting for admin initialization. Ensure the component proceeds directly to fetching and displaying pending UTR submissions for any authenticated user."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Remove or deprecate the `useInitAdmin` hook since admin initialization is no longer required. The hook can be left as a no-op for backward compatibility or removed entirely if no other components reference it. Verify that `usePendingVerifications` and `useApproveUTR` hooks remain unchanged and continue to work for all authenticated users."
+        }
+      ]
+    }
+  ]
 }

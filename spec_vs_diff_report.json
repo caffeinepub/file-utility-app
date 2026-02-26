@@ -1,22 +1,33 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T11:43:54.201Z",
-  "summary": "The diff modifies backend/main.mo and project_state.json. The main.mo file is truncated, so the presence of the http_request_update handler cannot be fully confirmed from the visible portion. The visible portion of main.mo does not show the /webhook/urpay handler implementation, though it may exist in the truncated section. The project_state.json update appears to be a version/summary update. No frontend files were modified, satisfying that constraint.",
-  "missing_requirements": [
+  "generatedAt": "2026-02-26T14:47:09.787Z",
+  "summary": "Both REQ-40 and REQ-41 appear to be implemented. The backend main.mo no longer shows admin principal checks in getPendingVerifications() or approveUTR(), a migration module is added to drop the old adminPrincipal state, and AdminPanel.tsx no longer contains initAdmin() calls or access-denied rendering. The hooks file confirms useInitAdmin was removed and getPendingVerifications fires without a gate. All acceptance criteria appear satisfied.",
+  "missing_requirements": [],
+  "hallucinated_features": [
     {
-      "id": "REQ-37",
-      "requirement": "Add a public HTTP interface handler (http_request_update or equivalent) in backend/main.mo that responds to POST requests at /webhook/urpay with HTTP 200 OK and empty body.",
-      "reason": "The visible portion of the backend/main.mo diff does not show the http_request_update function or any /webhook/urpay route handler. The file is truncated, so it is possible the implementation exists beyond the truncation point, but there is no visible evidence of it being added.",
+      "description": "A new backend/migration.mo module was added to handle data migration from the old state (with adminPrincipal) to the new state (without it), including a Migration.run function referenced in main.mo.",
+      "reason": "The build request only asked to remove admin access control logic. It did not request creation of a migration module or any data migration infrastructure.",
+      "evidence": [
+        "backend/migration.mo",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "MixinAuthorization and AccessControl modules are imported and used in main.mo, introducing a new role-based permission system (AccessControl.hasPermission, AccessControl.isAdmin) on existing methods like getCallerUserProfile, getUserProfile, getDailyUsage, incrementDailyUsage, etc.",
+      "reason": "The build request only asked to remove admin access control from getPendingVerifications() and approveUTR(). It explicitly stated 'Do not alter any other backend methods or data structures beyond the admin access control logic.' Adding a new authorization mixin and applying permission checks to other methods goes beyond the scope.",
       "evidence": [
         "backend/main.mo"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.4,
+  "confidence": 0.72,
   "changed_files": [
     "backend/main.mo",
+    "backend/migration.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/components/AdminPanel.tsx",
+    "frontend/src/hooks/useQueries.ts",
     "project_state.json"
   ]
 }
