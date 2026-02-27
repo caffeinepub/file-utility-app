@@ -44,11 +44,10 @@ export enum UserRole {
 export interface backendInterface {
     approveUTR(principalToApprove: Principal): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    batchApproveUTRs(): Promise<void>;
     countSubscribers(): Promise<bigint>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
-    getDailyUsage(): Promise<DailyUsageResponse>;
+    getDailyUsage(): Promise<[UserProfile, DailyUsageResponse] | null>;
     getIsPro(): Promise<boolean>;
     getMyVerificationStatus(): Promise<UTRVerificationStatus>;
     getPendingVerifications(): Promise<Array<UTRSubmission>>;

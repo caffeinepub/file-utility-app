@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 29,
-  "summary": "Multi-functional file utility web app with tabbed navigation (Smart Compressor, Universal Converter, Toolbox, Subscription). Glassmorphism design, client-side processing priority, drag-and-drop zones with accent colors, cross-tab file state persistence, UPI payment verification flow, and Internet Identity login with per-user account (daily uses counter + subscription status saved to user profile). Admin panel is open to all authenticated users (no principal-based access control).",
+  "projectStateVersion": 31,
+  "summary": "Multi-functional file utility web app with tabbed navigation (Smart Compressor, Universal Converter, Toolbox, Subscription). Glassmorphism design, client-side processing priority, drag-and-drop zones with accent colors, cross-tab file state persistence, UPI payment verification flow, and Internet Identity login with per-user account (daily uses counter + subscription status saved to user profile). Admin panel (/admin) is access-controlled: only the hardcoded Principal `s4myo-xkgcs-g3v6k-ebulj-irmjb-jkgr6-5mytx-gcqbz-a3qgn-fy7zr-yae` can access it; all others see 'Access denied. Admin only.'",
   "architectural_notes": [
     "Prioritize client-side processing (browser-based) over server-side for all file operations",
     "Use Canvas API for image conversions and PDF-Lib for PDF document operations",
@@ -10,7 +10,7 @@
     "Payment flow uses manual UPI verification: user pays via https://urpy.link/UhZjQD, submits 12-digit UTR ID, stored as Pending in backend; admin approves via /admin page to grant Pro access",
     "Internet Identity (id.ai) is used for user authentication; user principal drives per-user storage of dailyUses and isPro in the backend canister",
     "Urpay webhook endpoint at POST /webhook/urpay: validates payment_status=SUCCESS and sets isPro=true for matched user by email",
-    "Admin panel (/admin) is open to all authenticated users — no principal-based access control; getPendingVerifications() and approveUTR() callable by any caller"
+    "Admin panel (/admin) is restricted to a single hardcoded principal: s4myo-xkgcs-g3v6k-ebulj-irmjb-jkgr6-5mytx-gcqbz-a3qgn-fy7zr-yae; all other callers are denied"
   ],
   "known_issues": [
     "Daily Uses counter stuck at 0 — counter increment logic not wired to file operations"
@@ -264,6 +264,14 @@
         "REQ-41"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-components-adminpanel-tsx-restore-the-access-denied-guard-when-getpendingverifications-returns-an-access-denied-error-from-the-backend-display-the-message-access-denied-admin-only-to-the-user-instead-of-the-pending-verifications-list-do-not-add-the-admin-route-to-the-main-tab-navigation-bar",
+      "title": "In `frontend/src/components/AdminPanel.tsx`, restore the access-denied guard: when `getPendingVerifications()` returns an access-denied error from the backend, display the message 'Access denied. Admin only.' to the user instead of the pending verifications list. Do not add the `/admin` route to the main tab navigation bar.",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -428,16 +436,16 @@
       "status": "pending"
     },
     {
-      "id": "AR-34",
-      "summary": "Remove all admin access restrictions: make getPendingVerifications() and approveUTR() callable by any authenticated user. Remove initAdmin() principal-check logic and the 'Access denied. Admin only.' gate from both backend and AdminPanel.tsx.",
+      "id": "AR-36",
+      "summary": "Lock /admin access to only Principal `s4myo-xkgcs-g3v6k-ebulj-irmjb-jkgr6-5mytx-gcqbz-a3qgn-fy7zr-yae`. Hardcode this principal in backend/main.mo as the sole authorized admin for getPendingVerifications() and approveUTR(). Restore 'Access denied. Admin only.' in AdminPanel.tsx for all other callers.",
       "reqIds": [],
       "status": "pending"
     },
     {
-      "id": "AR-35",
-      "summary": "In `backend/main.mo`, remove all principal-based access control from `getPendingVerifications()` and `approveUTR()`. Both methods must be callable by any authenticated user without any admin principal check. Remove or disable the `initAdmin()` method's principal-storage logic so it no longer gates access. Remove any stored admin principal state and all access-denied guard clauses from these two methods.",
+      "id": "AR-37",
+      "summary": "In `backend/main.mo`, hardcode the Principal `s4myo-xkgcs-g3v6k-ebulj-irmjb-jkgr6-5mytx-gcqbz-a3qgn-fy7zr-yae` as the sole authorized admin. The `getPendingVerifications()` and `approveUTR()` methods must reject any caller whose principal does not match this hardcoded value, returning an access-denied error (e.g., `#err(\"Access denied. Admin only.\")`). Remove any dynamic admin-registration logic (e.g., `initAdmin()`) if still present in the actor.",
       "reqIds": [
-        "REQ-40"
+        "REQ-42"
       ],
       "status": "pending"
     }

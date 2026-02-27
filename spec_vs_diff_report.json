@@ -1,32 +1,16 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T14:47:09.787Z",
-  "summary": "Both REQ-40 and REQ-41 appear to be implemented. The backend main.mo no longer shows admin principal checks in getPendingVerifications() or approveUTR(), a migration module is added to drop the old adminPrincipal state, and AdminPanel.tsx no longer contains initAdmin() calls or access-denied rendering. The hooks file confirms useInitAdmin was removed and getPendingVerifications fires without a gate. All acceptance criteria appear satisfied.",
+  "generatedAt": "2026-02-27T08:50:09.507Z",
+  "summary": "Both REQ-42 and REQ-43 appear to be implemented. The backend hardcodes the admin principal and guards both methods; the frontend AdminPanel detects access-denied errors and renders the appropriate message. No hallucinated features were identified.",
   "missing_requirements": [],
-  "hallucinated_features": [
-    {
-      "description": "A new backend/migration.mo module was added to handle data migration from the old state (with adminPrincipal) to the new state (without it), including a Migration.run function referenced in main.mo.",
-      "reason": "The build request only asked to remove admin access control logic. It did not request creation of a migration module or any data migration infrastructure.",
-      "evidence": [
-        "backend/migration.mo",
-        "backend/main.mo"
-      ]
-    },
-    {
-      "description": "MixinAuthorization and AccessControl modules are imported and used in main.mo, introducing a new role-based permission system (AccessControl.hasPermission, AccessControl.isAdmin) on existing methods like getCallerUserProfile, getUserProfile, getDailyUsage, incrementDailyUsage, etc.",
-      "reason": "The build request only asked to remove admin access control from getPendingVerifications() and approveUTR(). It explicitly stated 'Do not alter any other backend methods or data structures beyond the admin access control logic.' Adding a new authorization mixin and applying permission checks to other methods goes beyond the scope.",
-      "evidence": [
-        "backend/main.mo"
-      ]
-    }
-  ],
-  "confidence": 0.72,
+  "hallucinated_features": [],
+  "confidence": 0.88,
   "changed_files": [
     "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
     "frontend/src/components/AdminPanel.tsx",
+    "frontend/src/contexts/UsageContext.tsx",
     "frontend/src/hooks/useQueries.ts",
     "project_state.json"
   ]

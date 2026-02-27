@@ -1,27 +1,21 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Remove admin access restrictions — open admin panel to all authenticated users",
+  "title": "Lock admin access to hardcoded Principal ID",
   "requirements": [
     {
-      "id": "REQ-41",
-      "summary": "Remove admin access control from AdminPanel component, allowing all authenticated users to view and approve pending UTR verifications",
+      "id": "REQ-43",
+      "summary": "Restore access-denied guard in AdminPanel to display 'Access denied. Admin only.' message for unauthorized callers",
       "acceptanceCriteria": [
-        "AdminPanel.tsx no longer calls `initAdmin()` on mount.",
-        "AdminPanel.tsx no longer renders an 'Access denied. Admin only.' message under any condition.",
-        "On mount, the component immediately fetches and displays pending UTR verifications.",
-        "The Approve button on each row calls `approveUTR(targetPrincipal)` and removes the approved row from the list on success."
+        "When a non-admin user visits `/admin`, the `getPendingVerifications()` call returns an access-denied error and `AdminPanel.tsx` renders the message 'Access denied. Admin only.' instead of any verifications list.",
+        "When the hardcoded admin principal visits `/admin`, the verifications list is rendered normally with no access-denied message.",
+        "The `/admin` route does not appear in the main tab navigation bar."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/AdminPanel.tsx",
           "operation": "modify",
-          "description": "Remove the `useInitAdmin` hook call and its associated loading/error state handling. Remove the conditional rendering that displays 'Access denied. Admin only.' error message. Update the component to immediately call `usePendingVerifications` on mount without waiting for admin initialization. Ensure the component proceeds directly to fetching and displaying pending UTR submissions for any authenticated user."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Remove or deprecate the `useInitAdmin` hook since admin initialization is no longer required. The hook can be left as a no-op for backward compatibility or removed entirely if no other components reference it. Verify that `usePendingVerifications` and `useApproveUTR` hooks remain unchanged and continue to work for all authenticated users."
+          "description": "Add error handling to catch access-denied errors from getPendingVerifications() backend call. When the backend returns an error (trap) indicating unauthorized access, render a centered message displaying 'Access denied. Admin only.' instead of the verifications list. Maintain the existing immediate fetch on mount and approve controls for authorized admins. The component should gracefully handle the authorization trap from the backend and present a clear denial screen to non-admin users."
         }
       ]
     }

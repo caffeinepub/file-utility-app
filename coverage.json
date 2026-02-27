@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T14:47:09.791Z",
+  "generatedAt": "2026-02-27T08:50:09.511Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -11,30 +11,27 @@
     "implemented": 1,
     "items": [
       {
-        "id": "REQ-40",
-        "summary": "In `backend/main.mo`, remove all principal-based access control from `getPendingVerifications()` and `approveUTR()`. Both methods must be callable by any authenticated user without any admin principal check. Remove or disable the `initAdmin()` method's principal-storage logic so it no longer gates access. Remove any stored admin principal state and all access-denied guard clauses from these two methods.",
+        "id": "REQ-42",
+        "summary": "In `backend/main.mo`, hardcode the Principal `s4myo-xkgcs-g3v6k-ebulj-irmjb-jkgr6-5mytx-gcqbz-a3qgn-fy7zr-yae` as the sole authorized admin. The `getPendingVerifications()` and `approveUTR()` methods must reject any caller whose principal does not match this hardcoded value, returning an access-denied error (e.g., `#err(\"Access denied. Admin only.\")`). Remove any dynamic admin-registration logic (e.g., `initAdmin()`) if still present in the actor.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-41",
-        "summary": "In `frontend/src/components/AdminPanel.tsx`, remove the `initAdmin()` call on mount and remove the 'Access denied. Admin only.' error display logic. The component should proceed directly to calling `getPendingVerifications()` on mount and display the results. Any conditional rendering tied to an access-denied state must be removed.",
+        "id": "REQ-43",
+        "summary": "In `frontend/src/components/AdminPanel.tsx`, restore the access-denied guard: when `getPendingVerifications()` returns an access-denied error from the backend, display the message 'Access denied. Admin only.' to the user instead of the pending verifications list. Do not add the `/admin` route to the main tab navigation bar.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/AdminPanel.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/AdminPanel.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/AdminPanel.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/AdminPanel.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
@@ -42,6 +39,7 @@
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
     "frontend/src/components/AdminPanel.tsx",
+    "frontend/src/contexts/UsageContext.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
     "frontend/src/hooks/useQueries.ts",

@@ -56,10 +56,15 @@ export function UsageProvider({ children }: { children: ReactNode }) {
         ]);
 
         const today = getTodayString();
-        // If the stored date matches today, use backend count; otherwise it's a new day (count = 0)
-        const backendDate = usageResponse.date;
-        const count = backendDate === today ? Number(usageResponse.count) : 0;
-        setUsesCount(count);
+        // getDailyUsage returns [UserProfile, DailyUsageResponse] | null
+        if (usageResponse !== null) {
+          const dailyUsage = usageResponse[1];
+          const backendDate = dailyUsage.date;
+          const count = backendDate === today ? Number(dailyUsage.count) : 0;
+          setUsesCount(count);
+        } else {
+          setUsesCount(0);
+        }
         setIsPro(proStatus);
       } catch {
         // Fallback to localStorage on error

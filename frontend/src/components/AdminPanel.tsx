@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldAlert, CheckCircle2, Loader2, Clock, AlertCircle, RefreshCw } from 'lucide-react';
+import { ShieldAlert, ShieldX, CheckCircle2, Loader2, Clock, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type UTRSubmission } from '../backend';
 import { useGetPendingVerifications, useApproveUTR } from '../hooks/useQueries';
@@ -91,6 +91,12 @@ function PendingCard({
   );
 }
 
+function isAccessDeniedError(error: unknown): boolean {
+  if (!error) return false;
+  const msg = error instanceof Error ? error.message : String(error);
+  return msg.toLowerCase().includes('access denied') || msg.toLowerCase().includes('admin only');
+}
+
 export function AdminPanel() {
   const { data: pendingList, isLoading, error, refetch, isFetching } = useGetPendingVerifications();
   const approveUTR = useApproveUTR();
@@ -109,6 +115,28 @@ export function AdminPanel() {
       setApprovingPrincipal(null);
     }
   };
+
+  // Show access-denied screen for unauthorized callers
+  if (error && isAccessDeniedError(error)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className={cn(
+          'flex flex-col items-center gap-5 px-8 py-12 rounded-2xl text-center max-w-sm w-full',
+          'backdrop-blur-md bg-white/5 border border-destructive/30',
+        )}>
+          <div className="w-16 h-16 rounded-2xl bg-destructive/15 border border-destructive/30 flex items-center justify-center">
+            <ShieldX className="w-8 h-8 text-destructive" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold text-white">Access denied. Admin only.</h2>
+            <p className="text-sm text-white/50">
+              You do not have permission to view this page.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -140,8 +168,8 @@ export function AdminPanel() {
           </button>
         </div>
 
-        {/* Generic Error */}
-        {error && (
+        {/* Generic Error (non-access-denied) */}
+        {error && !isAccessDeniedError(error) && (
           <div className={cn(
             'flex items-center gap-3 px-5 py-4 rounded-xl',
             'backdrop-blur-md bg-destructive/10 border border-destructive/30',

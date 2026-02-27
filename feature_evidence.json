@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-in-frontend-src-components-adminpanel-tsx-remove-the-initadmin-call-on-mount-and-remove-the-access-denied-admin-only-error-display-logic-the-component-should-proceed-directly-to-calling-getpendingverifications-on-mount-and-display-the-results-any-conditional-rendering-tied-to-an-access-denied-state-must-be-removed",
-      "featureTitle": "In `frontend/src/components/AdminPanel.tsx`, remove the `initAdmin()` call on mount and remove the 'Access denied. Admin only.' error display logic. The component should proceed directly to calling `getPendingVerifications()` on mount and display the results. Any conditional rendering tied to an access-denied state must be removed.",
+      "featureId": "feature-in-frontend-src-components-adminpanel-tsx-restore-the-access-denied-guard-when-getpendingverifications-returns-an-access-denied-error-from-the-backend-display-the-message-access-denied-admin-only-to-the-user-instead-of-the-pending-verifications-list-do-not-add-the-admin-route-to-the-main-tab-navigation-bar",
+      "featureTitle": "In `frontend/src/components/AdminPanel.tsx`, restore the access-denied guard: when `getPendingVerifications()` returns an access-denied error from the backend, display the message 'Access denied. Admin only.' to the user instead of the pending verifications list. Do not add the `/admin` route to the main tab navigation bar.",
       "files": [
-        "frontend/src/components/AdminPanel.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/components/AdminPanel.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -17,7 +16,7 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-41"
+        "REQ-43"
       ],
       "confidence": "high"
     }

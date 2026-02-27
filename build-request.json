@@ -1,57 +1,56 @@
 {
   "kind": "build_request",
-  "title": "Remove admin access restrictions — open admin panel to all authenticated users",
-  "priority": "high",
+  "title": "Lock admin access to hardcoded Principal ID",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-40",
-      "text": "In `backend/main.mo`, remove all principal-based access control from `getPendingVerifications()` and `approveUTR()`. Both methods must be callable by any authenticated user without any admin principal check. Remove or disable the `initAdmin()` method's principal-storage logic so it no longer gates access. Remove any stored admin principal state and all access-denied guard clauses from these two methods.",
+      "id": "REQ-42",
+      "text": "In `backend/main.mo`, hardcode the Principal `s4myo-xkgcs-g3v6k-ebulj-irmjb-jkgr6-5mytx-gcqbz-a3qgn-fy7zr-yae` as the sole authorized admin. The `getPendingVerifications()` and `approveUTR()` methods must reject any caller whose principal does not match this hardcoded value, returning an access-denied error (e.g., `#err(\"Access denied. Admin only.\")`). Remove any dynamic admin-registration logic (e.g., `initAdmin()`) if still present in the actor.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-last"
+          "msg-recent"
         ],
         "quotes": [
-          "Just give everyone admin access",
-          "removing all admin access restrictions so everyone can access the `/admin` panel without any principal check"
+          "lock the admin access for all people and give access to only this Principal ID- s4myo-xkgcs-g3v6k-ebulj-irmjb-jkgr6-5mytx-gcqbz-a3qgn-fy7zr-yae"
         ]
       },
       "acceptanceCriteria": [
-        "`getPendingVerifications()` returns pending UTR submissions when called by any authenticated principal (not just a stored admin).",
-        "`approveUTR(targetPrincipal)` successfully approves a UTR when called by any authenticated principal.",
-        "No 'access denied' or 'unauthorized' error is returned from either method for any authenticated caller.",
-        "`initAdmin()` no longer stores or enforces an admin principal (can be a no-op or removed)."
+        "The Principal `s4myo-xkgcs-g3v6k-ebulj-irmjb-jkgr6-5mytx-gcqbz-a3qgn-fy7zr-yae` is hardcoded in `backend/main.mo` as a constant.",
+        "`getPendingVerifications()` returns an access-denied error for any caller whose principal does not match the hardcoded admin principal.",
+        "`approveUTR()` returns an access-denied error for any caller whose principal does not match the hardcoded admin principal.",
+        "The hardcoded admin principal can successfully call both `getPendingVerifications()` and `approveUTR()` without receiving an access-denied error.",
+        "No dynamic admin-registration method (e.g., `initAdmin()`) exists or affects admin authorization."
       ]
     },
     {
-      "id": "REQ-41",
-      "text": "In `frontend/src/components/AdminPanel.tsx`, remove the `initAdmin()` call on mount and remove the 'Access denied. Admin only.' error display logic. The component should proceed directly to calling `getPendingVerifications()` on mount and display the results. Any conditional rendering tied to an access-denied state must be removed.",
+      "id": "REQ-43",
+      "text": "In `frontend/src/components/AdminPanel.tsx`, restore the access-denied guard: when `getPendingVerifications()` returns an access-denied error from the backend, display the message 'Access denied. Admin only.' to the user instead of the pending verifications list. Do not add the `/admin` route to the main tab navigation bar.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-last"
+          "msg-recent"
         ],
         "quotes": [
-          "removing all admin access restrictions",
-          "remove the access-denied gate"
+          "Restore the 'Access denied. Admin only.' message for unauthorized callers, so non-admin users visiting `/admin` see a denial screen."
         ]
       },
       "acceptanceCriteria": [
-        "AdminPanel.tsx no longer calls `initAdmin()` on mount.",
-        "AdminPanel.tsx no longer renders an 'Access denied. Admin only.' message under any condition.",
-        "On mount, the component immediately fetches and displays pending UTR verifications.",
-        "The Approve button on each row calls `approveUTR(targetPrincipal)` and removes the approved row from the list on success."
+        "When a non-admin user visits `/admin`, the `getPendingVerifications()` call returns an access-denied error and `AdminPanel.tsx` renders the message 'Access denied. Admin only.' instead of any verifications list.",
+        "When the hardcoded admin principal visits `/admin`, the verifications list is rendered normally with no access-denied message.",
+        "The `/admin` route does not appear in the main tab navigation bar."
       ]
     }
   ],
   "constraints": [
-    "Do not change the visual design or layout of AdminPanel.tsx beyond removing the access-denied gate.",
-    "Do not alter any other backend methods or data structures beyond the admin access control logic."
+    "The admin Principal `s4myo-xkgcs-g3v6k-ebulj-irmjb-jkgr6-5mytx-gcqbz-a3qgn-fy7zr-yae` must be hardcoded exactly as provided — do not alter or truncate it.",
+    "Do not add the /admin route to the main tab navigation bar.",
+    "Do not edit any immutable frontend paths listed in the system context."
   ],
   "nonGoals": [
-    "Adding any new authentication mechanism or replacing Internet Identity.",
-    "Changing the UTR submission or approval data model.",
-    "Modifying any tab other than the admin panel."
+    "Adding any new admin-registration or dynamic admin-assignment flow.",
+    "Changing the visual design or layout of the AdminPanel beyond restoring the access-denied message.",
+    "Modifying any other backend methods unrelated to admin access control."
   ],
   "imageRequirements": {
     "required": [],

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
-import { UTRVerificationStatus, type UTRSubmission, type DailyUsageResponse } from '../backend';
+import { UTRVerificationStatus, type UTRSubmission, type DailyUsageResponse, type UserProfile } from '../backend';
 
 export function useGetMyVerificationStatus() {
   const { actor, isFetching: actorFetching } = useActor();
@@ -88,7 +88,7 @@ export function useGetDailyUsage() {
   const { identity } = useInternetIdentity();
   const isAuthenticated = !!identity;
 
-  return useQuery<DailyUsageResponse>({
+  return useQuery<[UserProfile, DailyUsageResponse] | null>({
     queryKey: ['dailyUsage'],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
